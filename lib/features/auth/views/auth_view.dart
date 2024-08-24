@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:cine_vibe/features/auth/viewmodels/auth.viewmodel.dart';
 import 'package:cine_vibe/utils/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../common/widgets/custom_form_field_1.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -19,47 +23,78 @@ class _AuthViewState extends State<AuthView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: nameController,
-                validator: validateName,
-              ),
-              TextFormField(
-                controller: usernameController,
-                validator: validateName,
-              ),
-              TextFormField(
-                controller: emailController,
-                validator: validateEmail,
-              ),
-              TextFormField(
-                controller: passwordController,
-                validator: validatePasswordRegistration,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  AuthViewmodel authViewmodel =
-                      Provider.of<AuthViewmodel>(context, listen: false);
-                  if (_formKey.currentState!.validate()) {
-                    authViewmodel.name = nameController.text;
-                    authViewmodel.username = usernameController.text;
-                    authViewmodel.email = emailController.text;
-                    authViewmodel.password = passwordController.text;
-                    authViewmodel.registerUser(context);
-                  }
-                },
-                child: const Text("Register"),
-              )
-            ],
+      body: Consumer<AuthViewmodel>(builder: (context, authViewModel, child) {
+        return Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!authViewModel.isLogin)
+                  Column(
+                    children: [
+                      CustomTextFormField1(
+                        nameController: nameController,
+                        label: "Name",
+                        validator: validateName,
+                      ),
+                      const SizedBox(height: 10),
+                      CustomTextFormField1(
+                        nameController: usernameController,
+                        label: "Username",
+                        validator: validateName,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                CustomTextFormField1(
+                  nameController: emailController,
+                  label: "Email",
+                  validator: validateEmail,
+                ),
+                const SizedBox(height: 10),
+                CustomTextFormField1(
+                  nameController: passwordController,
+                  label: "Password",
+                  validator: validatePasswordRegistration,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9)),
+                      backgroundColor: Colors.blue,
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        authViewModel.name = nameController.text;
+                        authViewModel.username = usernameController.text;
+                        authViewModel.email = emailController.text;
+                        authViewModel.password = passwordController.text;
+                        await authViewModel.authenticateUser(context);
+                      }
+                    },
+                    child: Text(authViewModel.isLogin ? "Login" : "Register"),
+                  ),
+                ),
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      child:
+                          Text(authViewModel.isLogin ? "Sign Up" : "Sign In"),
+                      onPressed: () {
+                        authViewModel.isLogin = !authViewModel.isLogin;
+                        log(authViewModel.isLogin.toString());
+                      },
+                    ))
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

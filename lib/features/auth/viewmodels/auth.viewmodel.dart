@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cine_vibe/helpers/web_services_helper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -35,21 +36,38 @@ class AuthViewmodel extends LoadingViewmodel {
     _password = password;
   }
 
-  registerUser(context) async {
+  bool _isLogin = true;
+  bool get isLogin => _isLogin;
+  set isLogin(isLogin) {
+    _isLogin = isLogin;
+    notifyListeners();
+  }
+
+  authenticateUser(context) async {
     Map<String, dynamic> data = {
-      "name": _name,
-      "username": _username,
+      if (!isLogin) "name": _name,
+      if (!isLogin) "username": _username,
       "email": _email,
       "password": _password,
     };
-    try {
-      Response response = await repo.registerUser(data);
-      TokenModel tokenModel =
-          TokenModel.fromJson(jsonDecode(response.toString()));
-      SharedPreferencesManager.setUserId(tokenModel.token.toString());
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+    await handleResponseHelper(
+      context: context,
+      function: () =>
+          isLogin ? handleUserLogin(data) : handleUserRegistration(data),
+    );
+  }
+
+  Future<void> handleUserRegistration(Map<String, dynamic> data) async {
+    Response response = await repo.registerUser(data);
+    TokenModel tokenModel =
+        TokenModel.fromJson(jsonDecode(response.toString()));
+    SharedPreferencesManager.setUserId(tokenModel.token.toString());
+  }
+
+  Future<void> handleUserLogin(Map<String, dynamic> data) async {
+    Response response = await repo.loginUser(data);
+    TokenModel tokenModel =
+        TokenModel.fromJson(jsonDecode(response.toString()));
+    SharedPreferencesManager.setUserId(tokenModel.token.toString());
   }
 }
