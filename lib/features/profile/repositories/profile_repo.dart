@@ -13,6 +13,10 @@ class ProfileRepoImpl extends ProfileRepo {
   Future getUserProfile() async {
     Response response =
         await APIService().getDataFromDio(endPoint: authGetProfile);
-    return (response);
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      throw response.data["error"];
+    }
   }
 }

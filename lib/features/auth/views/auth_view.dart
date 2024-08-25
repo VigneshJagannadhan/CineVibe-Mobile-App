@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:cine_vibe/features/auth/viewmodels/auth.viewmodel.dart';
+import 'package:cine_vibe/features/home/views/home_view.dart';
+import 'package:cine_vibe/services/shared_pref_helper.dart';
 import 'package:cine_vibe/utils/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,9 +19,12 @@ class AuthView extends StatefulWidget {
 class _AuthViewState extends State<AuthView> {
   TextEditingController nameController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController =
+      TextEditingController(text: "vigneshk@gmail.com");
+  TextEditingController passwordController =
+      TextEditingController(text: "Abcd@1234");
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cine_vibe/features/home/views/home_view.dart';
 import 'package:cine_vibe/helpers/web_services_helper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -52,22 +53,18 @@ class AuthViewmodel extends LoadingViewmodel {
     };
     await handleResponseHelper(
       context: context,
-      function: () =>
-          isLogin ? handleUserLogin(data) : handleUserRegistration(data),
+      function: () async {
+        Response response = isLogin
+            ? await repo.loginUser(data)
+            : await repo.registerUser(data);
+        TokenModel tokenModel = TokenModel.fromJson(response.data);
+        await SharedPreferencesManager.setUserId(tokenModel.token.toString());
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const HomeView(),
+            ),
+            (c) => false);
+      },
     );
-  }
-
-  Future<void> handleUserRegistration(Map<String, dynamic> data) async {
-    Response response = await repo.registerUser(data);
-    TokenModel tokenModel =
-        TokenModel.fromJson(jsonDecode(response.toString()));
-    SharedPreferencesManager.setUserId(tokenModel.token.toString());
-  }
-
-  Future<void> handleUserLogin(Map<String, dynamic> data) async {
-    Response response = await repo.loginUser(data);
-    TokenModel tokenModel =
-        TokenModel.fromJson(jsonDecode(response.toString()));
-    SharedPreferencesManager.setUserId(tokenModel.token.toString());
   }
 }

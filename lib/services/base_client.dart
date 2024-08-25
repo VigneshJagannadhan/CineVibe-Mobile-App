@@ -23,9 +23,9 @@ class APIService {
 
   dio_import.Dio get dio => _dio;
 
-  Map<String, String> createHeaders() {
-    String token = SharedPreferencesManager.getUserId().toString();
-    return {"Authorization": token};
+  Map<String, String>? createHeaders() {
+    String? token = SharedPreferencesManager.getUserId();
+    return token != null ? {"Authorization": token} : null;
   }
 
   Future getDataFromDio({
